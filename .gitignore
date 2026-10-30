@@ -1,0 +1,25 @@
+# Secrets and local configurations
+*.env
+*.conf.local
+telegram.conf
+id_rsa
+id_ed25519
+*.key
+*.pem
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# Logs and runtime artifacts
+*.log
+*.pid
+*.sock
+nohup.out
+
+# OS artifacts
+.DS_Store
+Thumbs.db

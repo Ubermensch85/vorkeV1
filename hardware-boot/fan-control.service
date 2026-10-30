@@ -1,0 +1,13 @@
+[Unit]
+Description=Fan Control for Vorke V1 Plus
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/fan-control.sh
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
+

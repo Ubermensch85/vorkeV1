@@ -1,0 +1,216 @@
+#!/usr/bin/env zsh
+# ==============================================================================
+#  ZSH CONFIGURATION — ProDesk 600 Server
+#  Utente: ubermensch | OS: Debian Trixie
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 0) Sicurezza e Silenzio
+# ------------------------------------------------------------------------------
+set -o noclobber
+setopt no_beep
+setopt interactive_comments
+
+# ------------------------------------------------------------------------------
+# 1) Plugin & Integrazioni (Ordine Debian)
+# ------------------------------------------------------------------------------
+
+# fzf - Supporto tasti e completamento (Path Debian dinamico)
+for fzf_script in /usr/share/doc/fzf/examples/key-bindings.zsh /usr/share/doc/fzf/examples/completion.zsh; do
+  [ -r "$fzf_script" ] && source "$fzf_script"
+done
+
+# Autosuggestions
+if [ -r /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+  source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+  ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+  ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=245"
+  ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+  bindkey '^[[C' autosuggest-accept
+  bindkey '^E' autosuggest-accept
+fi
+
+# History substring search
+if [ -r /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh ]; then
+  source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
+  bindkey '^[[A' history-substring-search-up
+  bindkey '^[[B' history-substring-search-down
+fi
+
+# fzf-tab (Completamento moderno)
+if [ -r /usr/share/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh ]; then
+  source /usr/share/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh
+  zstyle ':fzf-tab:complete:*' fzf-preview ''
+  zstyle ':fzf-tab:complete:*' fzf-flags '--height=60% --layout=reverse'
+  zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always --icons $realpath 2>/dev/null || ls -1 --color=always $realpath'
+  zstyle ':fzf-tab:complete:systemctl-*:*' fzf-preview 'SYSTEMD_COLORS=1 systemctl status $word 2>/dev/null'
+fi
+
+# Syntax highlighting (Sempre per ultimo)
+if [ -r /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+  source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+
+# ------------------------------------------------------------------------------
+# 2) History Avanzata
+# ------------------------------------------------------------------------------
+HISTFILE=$HOME/.zsh_history
+HISTSIZE=100000
+SAVEHIST=100000
+setopt appendhistory incappendhistory sharehistory extended_history
+setopt histignorealldups histignorespace histreduceblanks histverify
+
+# ------------------------------------------------------------------------------
+# 3) Completamento Potenziato
+# ------------------------------------------------------------------------------
+autoload -Uz compinit bashcompinit
+ZSH_COMPDUMP=${ZSH_COMPDUMP:-$HOME/.zcompdump}
+if [[ -n ${ZSH_COMPDUMP}(#qN.mh+24) ]]; then compinit -i -d "${ZSH_COMPDUMP}"; else compinit -C -i -d "${ZSH_COMPDUMP}"; fi
+bashcompinit 2>/dev/null
+
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*:descriptions' format '%F{#81A1C1}%d%f'
+
+# ------------------------------------------------------------------------------
+# 4) Prompt Nord con Git
+# ------------------------------------------------------------------------------
+autoload -Uz colors vcs_info && colors
+
+zstyle ':vcs_info:*' enable git
+zstyle ':vcs_info:git:*' check-for-changes true
+zstyle ':vcs_info:git:*' stagedstr '%F{#A3BE8C}●%f'
+zstyle ':vcs_info:git:*' unstagedstr '%F{#EBCB8B}●%f'
+zstyle ':vcs_info:git:*' formats '%F{#81A1C1}[%b]%f %c%u '
+zstyle ':vcs_info:git:*' actionformats '%F{#BF616A}[%b|%a]%f %c%u '
+
+precmd() {
+  vcs_info
+  print -Pn "\e]0;%~\a"
+}
+
+setopt prompt_subst
+PROMPT='%F{#3281EA}%~%f ${vcs_info_msg_0_}%F{#88C0D0}>%F{#81A1C1}>%F{#3281EA}>%f '
+
+# ------------------------------------------------------------------------------
+# 5) Alias Moderni & Servizi
+# ------------------------------------------------------------------------------
+
+# Navigazione e visualizzazione
+if command -v eza &>/dev/null; then
+  alias ls='eza -lgh --icons --group-directories-first'
+  alias ll='eza -lgha --icons --group-directories-first'
+  alias lt='eza --tree --icons --level=2'
+  alias lta='eza --tree --icons --level=2 -a'
+else
+  alias ls='ls --color=auto'
+  alias ll='ls -la'
+fi
+
+if command -v bat &>/dev/null; then
+  alias cat='bat --paging=never'
+  alias less='bat --paging=always'
+fi
+
+# Utility Server
+alias ports='sudo ss -tulpn | grep LISTEN'
+alias who-ssh='who | grep pts'
+alias storage='df -h -x tmpfs -x devtmpfs'
+alias mem='free -h'
+alias logs='sudo journalctl -xeu'
+alias ufw-status='sudo ufw status numbered'
+alias speedtest="$HOME/.local/bin/speedtest"
+
+# Scorciatoie Servizi
+alias pms='sudo systemctl status plexmediaserver'
+alias trans='sudo systemctl status transmission-daemon'
+alias pi='sudo systemctl status pihole-FTL'
+alias smb='sudo systemctl status smbd'
+alias dns='sudo systemctl status dnsproxy'
+alias ts='sudo tailscale status'
+
+# ------------------------------------------------------------------------------
+# 6) Environment
+# ------------------------------------------------------------------------------
+export EDITOR='micro'
+export VISUAL='micro'
+export TERM='xterm-256color'
+export COLORTERM='truecolor'
+export PATH="$HOME/.local/bin:$PATH"
+
+# FZF Theme (Nord-ish)
+export FZF_DEFAULT_OPTS="--color=fg:#D8DEE9,bg:#2C2C2C,hl:#3281EA --color=fg+:#2C2C2C,bg+:#3281EA,hl+:#EBCB8B --color=info:#81A1C1,prompt:#3281EA,pointer:#BF616A,marker:#A3BE8C --height=60% --layout=reverse --border=rounded"
+
+# API Keys (Mantenute dal vecchio config)
+export GEMINI_API_KEY="AIzaSyDZaPUqsx9A3r55iRk2HVGpr0zPukVrJ-M"
+
+# ------------------------------------------------------------------------------
+# 7) Zoxide (Smart cd)
+# ------------------------------------------------------------------------------
+if command -v zoxide &>/dev/null; then
+  eval "$(zoxide init zsh)"
+  alias cd='z'
+  alias cdi='zi'
+fi
+
+# ------------------------------------------------------------------------------
+# 8) Funzioni Avanzate
+# ------------------------------------------------------------------------------
+
+# Aggiornamento Totale del Server tramite DNS Guardian
+update-all() {
+  echo ">>> Avvio Guardian Update Suite (Vorke Roccella)..."
+  sudo /usr/local/bin/guardian-update.sh
+  echo ">>> Aggiornamento Antigravity CLI..."
+  command -v agy &>/dev/null && agy update || true
+  echo ">>> Operazioni concluse."
+}
+alias update='update-all'
+
+# Stato Rapido Servizi
+sys-status() {
+  echo -e "SERVIZIO\tSTATO"
+  echo -e "--------\t-----"
+  for s in plexmediaserver transmission-daemon pihole-FTL smbd dnsproxy tailscaled; do
+    local state=$(systemctl is-active $s 2>/dev/null || echo "not-found")
+    if [ "$state" = "active" ]; then
+      echo -e "$s\t\e[1;32m[active]\e[0m"
+    else
+      echo -e "$s\t\e[1;31m[$state]\e[0m"
+    fi
+  done | column -t -s $'\t'
+}
+
+# ------------------------------------------------------------------------------
+# 9) Qualità di Vita
+# ------------------------------------------------------------------------------
+setopt autocd correct nocheckjobs nohup
+alias mkcd='mkdir -p "$1" && cd "$1"'
+alias scaricamp3='bash ~/scaricamp3.sh'
+
+# Estrattore universale
+extract() {
+  if [ -f $1 ]; then
+    case $1 in
+      *.tar.bz2) tar xjf $1 ;; *.tar.gz) tar xzf $1 ;; *.tar.xz) tar xf $1 ;;
+      *.rar) unrar x $1 ;; *.zip) unzip $1 ;; *.7z) 7z x $1 ;;
+      *) echo "'$1' non supportato" ;;
+    esac
+  else
+    echo "'$1' non è un file valido"
+  fi
+}
+
+
+# Added by Antigravity CLI installer
+export PATH="/home/ubermensch/.local/bin:$PATH"
+
+# Antigravity CLI (agy) keyring setup for SSH/headless sessions
+if [ -n "$SSH_TTY" ] || [ -n "$SSH_CLIENT" ]; then
+    if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
+        eval $(dbus-launch --sh-syntax)
+    fi
+    eval $(echo "" | gnome-keyring-daemon --unlock 2>/dev/null)
+    eval $(gnome-keyring-daemon --start 2>/dev/null)
+fi
+

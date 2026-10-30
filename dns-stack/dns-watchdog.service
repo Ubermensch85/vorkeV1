@@ -1,0 +1,9 @@
+[Unit]
+Description=Watchdog di Auto-Guarigione DNS (Pi-hole + dnsproxy)
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/dns-watchdog.sh
+StandardOutput=journal
+StandardError=journal

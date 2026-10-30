@@ -1,0 +1,12 @@
+[Unit]
+Description=Enable UDP GRO Forwarding for enp1s0 (Tailscale Best Practice)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/ethtool -K enp1s0 gro on rx-gro-list off rx-udp-gro-forwarding on
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

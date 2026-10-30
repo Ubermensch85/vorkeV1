@@ -1,0 +1,41 @@
+[Unit]
+Description=AdGuard DNS Proxy (DoQ / DoH3 / DoH2)
+After=network-online.target
+Wants=network-online.target
+Before=pihole-FTL.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/dnsproxy \
+  -l 127.0.0.1 -p 5353 \
+  -u h3://1.0.0.2/dns-query \
+  -u https://1.0.0.2/dns-query \
+  -u quic://9.9.9.9:853 \
+  -u quic://149.112.112.9:853 \
+  --fallback https://1.0.0.2/dns-query \
+  --fallback https://9.9.9.9/dns-query \
+  --upstream-mode=parallel \
+  --dnssec \
+  --refuse-any \
+  --pending-requests-enabled \
+  --udp-buf-size=1232 \
+  --timeout=2s \
+  -r 1000 \
+  --cache --cache-size=4194304 --cache-max-ttl=3600 \
+  --cache-optimistic
+Restart=always
+RestartSec=5
+User=ubermensch
+Nice=-10
+OOMScoreAdjust=-500
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+
+[Install]
+WantedBy=multi-user.target

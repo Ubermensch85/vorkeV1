@@ -1,0 +1,11 @@
+[Unit]
+Description=Esecuzione periodica Watchdog DNS ogni 60 secondi
+After=network.target
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1min
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target

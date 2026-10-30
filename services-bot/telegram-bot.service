@@ -1,0 +1,20 @@
+[Unit]
+Description=Telegram Bot Diagnostico
+After=network.target dnsproxy.service pihole-FTL.service
+Wants=dnsproxy.service pihole-FTL.service
+
+[Service]
+Type=simple
+User=root
+Group=ubermensch
+WorkingDirectory=/home/ubermensch
+ExecStart=/usr/bin/python3 /usr/local/bin/my_bot.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+# Timeout per evitare zombie
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target

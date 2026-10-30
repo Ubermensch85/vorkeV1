@@ -1,0 +1,11 @@
+[Unit]
+Description=Esecuzione periodica manutenzione e aggiornamento Guardian (Mercoledì e Domenica alle 04:30)
+After=network.target
+
+[Timer]
+OnCalendar=Wed,Sun *-*-* 04:30:00
+RandomizedDelaySec=15m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

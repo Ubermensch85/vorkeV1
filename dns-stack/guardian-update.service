@@ -1,0 +1,11 @@
+[Unit]
+Description=Aggiornamento Intelligente e Manutenzione Catena DNS e Sistema
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/guardian-update.sh
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=1800
