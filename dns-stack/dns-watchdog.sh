@@ -15,7 +15,9 @@ log() {
 }
 
 notify() {
-    log "$1"
+    local clean_msg
+    clean_msg=$(echo "$1" | sed -E 's/<[^>]+>//g')
+    log "$clean_msg"
     if [ -x "$NOTIFY_BIN" ]; then
         "$NOTIFY_BIN" "$1"
     fi

@@ -25,9 +25,9 @@ done
 
 if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ -n "${TELEGRAM_CHAT_ID:-}" ]; then
     curl -s -m 10 -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-        -d chat_id="${TELEGRAM_CHAT_ID}" \
-        -d text="${FULL_MESSAGE}" \
-        -d parse_mode="HTML" > /dev/null 2>&1
+        --data-urlencode chat_id="${TELEGRAM_CHAT_ID}" \
+        --data-urlencode text="${FULL_MESSAGE}" \
+        --data-urlencode parse_mode="HTML" > /dev/null 2>&1
     exit 0
 fi
 

@@ -10,11 +10,12 @@ La catena DNS combina la protezione di **Pi-hole v6** con le performance di **dn
    - Ha come unico upstream `127.0.0.1#5353`.
 
 2. **dnsproxy (porta 5353)**:
-   - Risolve le query non bloccate inoltrandole in parallelo verso resolver DoQ / DoH3:
-     - `h3://1.0.0.2/dns-query` (Cloudflare HTTP/3)
-     - `https://1.0.0.2/dns-query` (Cloudflare HTTPS)
-     - `quic://9.9.9.9:853` (Quad9 QUIC)
-     - `quic://149.112.112.9:853` (Quad9 QUIC secondario)
+   - Risolve le query non bloccate inoltrandole in parallelo verso resolver DoH3 / DoH / DoT sicuri (con filtraggio malware):
+     - `h3://1.1.1.2/dns-query` (Cloudflare Malware-blocking HTTP/3)
+     - `h3://1.0.0.2/dns-query` (Cloudflare Malware-blocking HTTP/3)
+     - `https://9.9.9.9/dns-query` (Quad9 Malware-blocking HTTPS)
+     - `https://149.112.112.9/dns-query` (Quad9 Malware-blocking HTTPS)
+     - Fallback: `tls://1.1.1.2:853` e `tls://9.9.9.9:853` (DoT)
    - Valida la catena crittografica DNSSEC.
    - Implementa cache ottimistica (TTL max 3600, dimensione 4MB) per servire risposte sub-millisecondo.
 
@@ -92,10 +93,12 @@ RemainAfterExit=yes
 
 ---
 
-## 5. Firewall UFW (`ufw-setup.sh`)
+## 5. Firewall UFW (`ufw-setup.sh` & `before.rules`)
 
-Lo script `ufw-setup.sh` configura il firewall applicando il principio del minimo privilegio:
+La configurazione del firewall applica il principio del minimo privilegio e l'ottimizzazione del routing FTTH:
 - Accesso SSH limitato alla sottorete LAN locale e all'interfaccia sicura `tailscale0`.
 - Traffico DNS (porta 53 UDP/TCP) autorizzato dalla LAN locale e dai nodi Tailscale.
 - Interfaccia web Pi-hole (porta 80/443 e 8080) accessibile solo da indirizzi sicuri.
 - Politica predefinita di blocco per tutto il traffico in ingresso non esplicitamente consentito.
+- **Accettazione Multicast IGMP** (`/etc/ufw/before.rules`): regola `ACCEPT` per traffico IGMP (`224.0.0.0/4`), azzerando il logging superfluo dei membership query del router.
+- **TCP MSS Clamping** (`/etc/ufw/before.rules`): regola `TCPMSS --clamp-mss-to-pmtu` sulla catena `ufw-before-forward` per il traffico subnet/exit-node Tailscale verso linee FTTH PPPoE con MTU a 1492 byte.

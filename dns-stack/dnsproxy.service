@@ -1,5 +1,5 @@
 [Unit]
-Description=AdGuard DNS Proxy (DoQ / DoH3 / DoH2)
+Description=AdGuard DNS Proxy (DoH3 / DoH2 / DoT)
 After=network-online.target
 Wants=network-online.target
 Before=pihole-FTL.service
@@ -8,12 +8,12 @@ Before=pihole-FTL.service
 Type=simple
 ExecStart=/usr/local/bin/dnsproxy \
   -l 127.0.0.1 -p 5353 \
+  -u h3://1.1.1.2/dns-query \
   -u h3://1.0.0.2/dns-query \
-  -u https://1.0.0.2/dns-query \
-  -u quic://9.9.9.9:853 \
-  -u quic://149.112.112.9:853 \
-  --fallback https://1.0.0.2/dns-query \
-  --fallback https://9.9.9.9/dns-query \
+  -u https://9.9.9.9/dns-query \
+  -u https://149.112.112.9/dns-query \
+  --fallback tls://1.1.1.2:853 \
+  --fallback tls://9.9.9.9:853 \
   --upstream-mode=parallel \
   --dnssec \
   --refuse-any \

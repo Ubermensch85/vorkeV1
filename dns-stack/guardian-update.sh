@@ -18,7 +18,11 @@ log() {
 }
 
 notify() {
-    log "$1"
+    # Rimuove i tag HTML per la visualizzazione a terminale e nel log locale
+    local clean_msg
+    clean_msg=$(echo "$1" | sed -E 's/<[^>]+>//g')
+    echo -e "\n$clean_msg\n" | tee -a "$LOG_FILE"
+
     if [ -x "$NOTIFY_BIN" ]; then
         "$NOTIFY_BIN" "$1"
     fi
@@ -128,7 +132,7 @@ if ! dig @127.0.0.1 -p 53 google.com +short +time=1 >/dev/null 2>&1; then
     DNS_STATUS="⚠️ DEGRADATO"
 fi
 
-REPORT="✅ <b>Manutenzione & Aggiornamento Completati</b>
+REPORT="✅ <b>Manutenzione ed Aggiornamento Completati</b>
 ───────────────────
 ⏱️ Uptime: <code>$UPTIME</code>
 🧠 RAM: <code>$RAM</code> | 🌐 IP: <code>$PUBLIC_IP</code>
