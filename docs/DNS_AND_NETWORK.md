@@ -11,8 +11,8 @@ La catena DNS combina la protezione di **Pi-hole v6** con le performance di **dn
 
 2. **dnsproxy (porta 5353)**:
    - Risolve le query non bloccate inoltrandole in parallelo verso resolver DoH3 / DoH / DoT sicuri (con filtraggio malware):
-     - `h3://1.1.1.2/dns-query` (Cloudflare Malware-blocking HTTP/3)
-     - `h3://1.0.0.2/dns-query` (Cloudflare Malware-blocking HTTP/3)
+     - `https://1.1.1.2/dns-query` (Cloudflare Malware-blocking HTTPS/2)
+     - `h3://1.0.0.2/dns-query` (Cloudflare Malware-blocking HTTP/3 su QUIC)
      - `https://9.9.9.9/dns-query` (Quad9 Malware-blocking HTTPS)
      - `https://149.112.112.9/dns-query` (Quad9 Malware-blocking HTTPS)
      - Fallback: `tls://1.1.1.2:853` e `tls://9.9.9.9:853` (DoT)

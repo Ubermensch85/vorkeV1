@@ -8,7 +8,7 @@ Before=pihole-FTL.service
 Type=simple
 ExecStart=/usr/local/bin/dnsproxy \
   -l 127.0.0.1 -p 5353 \
-  -u h3://1.1.1.2/dns-query \
+  -u https://1.1.1.2/dns-query \
   -u h3://1.0.0.2/dns-query \
   -u https://9.9.9.9/dns-query \
   -u https://149.112.112.9/dns-query \
