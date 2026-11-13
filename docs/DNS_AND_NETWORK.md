@@ -9,15 +9,13 @@ La catena DNS combina la protezione di **Pi-hole v6** con le performance di **dn
    - Filtra telemetria, pubblicità, tracker e domini malevoli.
    - Ha come unico upstream `127.0.0.1#5353`.
 
-2. **dnsproxy (porta 5353)**:
-   - Risolve le query non bloccate inoltrandole in parallelo verso resolver DoH3 / DoH / DoT sicuri (con filtraggio malware):
-     - `https://1.1.1.2/dns-query` (Cloudflare Malware-blocking HTTPS/2)
-     - `h3://1.0.0.2/dns-query` (Cloudflare Malware-blocking HTTP/3 su QUIC)
-     - `https://9.9.9.9/dns-query` (Quad9 Malware-blocking HTTPS)
-     - `https://149.112.112.9/dns-query` (Quad9 Malware-blocking HTTPS)
-     - Fallback: `tls://1.1.1.2:853` e `tls://9.9.9.9:853` (DoT)
+2. **dnsproxy (porta 5353 — configurazione YAML `/etc/dnsproxy/config.yaml`)**:
+   - Risolve le query non bloccate inoltrandole in parallelo verso resolver DoH/DoH3 sicuri (con filtraggio malware, `http3: true`, `tls-min-version: 1.3`, `timeout: 3s` e fallback `tls://` su `853`):
+     - `https://9.9.9.9/dns-query` e `https://149.112.112.9/dns-query` (Quad9 Malware-blocking)
+     - `https://1.1.1.2/dns-query` e `https://1.0.0.2/dns-query` (Cloudflare Malware-blocking, con negoziazione HTTP/3 + HTTP/2)
+     - Bootstrap esplicito (`9.9.9.9`, `149.112.112.9`, `1.1.1.2`, `1.0.0.2`) e fallback DoT (`tls://1.1.1.2:853`, `tls://9.9.9.9:853`).
    - Valida la catena crittografica DNSSEC.
-   - Implementa cache ottimistica (TTL max 3600, dimensione 4MB) per servire risposte sub-millisecondo.
+   - Implementa cache ottimistica da **16 MB** (`optimistic-answer-ttl: 60s`, `optimistic-max-age: 24h`) per servire risposte sub-millisecondo.
 
 ---
 
