@@ -99,28 +99,50 @@ check_blocking() {
 check_upstream_quad9() {
   section "5. Upstream & protocolli"
 
+  cfg_file="/etc/dnsproxy/config.yaml"
   svc_file="/etc/systemd/system/dnsproxy.service"
-  if [[ -f "$svc_file" ]]; then
-    # Mostra tutti gli upstream configurati
-    # Upstream primari: righe con -u (distinte da --fallback)
+  if [[ -f "$cfg_file" ]]; then
+    ok "Configurazione YAML trovata: $cfg_file"
+    doh_upstreams=$(awk '/^upstream:/{flag=1; next} /^[a-zA-Z]/{flag=0} flag && /- /{print $2}' "$cfg_file" | grep -E '^(https|h3)://')
+    quic_upstreams=$(awk '/^upstream:/{flag=1; next} /^[a-zA-Z]/{flag=0} flag && /- /{print $2}' "$cfg_file" | grep -E '^quic://')
+    fallback_upstreams=$(awk '/^fallback:/{flag=1; next} /^[a-zA-Z]/{flag=0} flag && /- /{print $2}' "$cfg_file")
+    upstream_mode=$(grep -oP '(?<=^upstream-mode:\s)\S+' "$cfg_file" 2>/dev/null)
+
+    if [[ -n "$doh_upstreams" ]]; then
+      ok "Upstream primari DoH/DoH3:"
+      while IFS= read -r u; do info "  $u"; done <<< "$doh_upstreams"
+    fi
+    if [[ -n "$quic_upstreams" ]]; then
+      ok "Upstream primari DoQ (QUIC):"
+      while IFS= read -r u; do info "  $u"; done <<< "$quic_upstreams"
+    fi
+    if [[ -z "$doh_upstreams" && -z "$quic_upstreams" ]]; then
+      warn "Nessun upstream DoH/DoQ trovato in $cfg_file"
+    fi
+    if [[ -n "$fallback_upstreams" ]]; then
+      ok "Fallback configurati:"
+      while IFS= read -r u; do info "  $u"; done <<< "$fallback_upstreams"
+    else
+      info "Nessun fallback configurato"
+    fi
+    [[ -n "$upstream_mode" ]] && info "Modalità upstream: ${upstream_mode}"
+  elif [[ -f "$svc_file" ]]; then
+    # Fallback legacy: parsing da unit systemd
     quic_upstreams=$(grep -P '^\s+-u quic://' "$svc_file" 2>/dev/null | grep -oP 'quic://[^\s\\]+')
     doh_upstreams=$(grep -P '^\s+-u (https|h3)://' "$svc_file" 2>/dev/null | grep -oP '(https|h3)://[^\s\\]+')
-    fallback_upstreams=$(grep -P '^\s+--fallback' "$svc_file" 2>/dev/null | grep -oP '(quic|https)://[^\s\\]+')
+    fallback_upstreams=$(grep -P '^\s+--fallback' "$svc_file" 2>/dev/null | grep -oP '(quic|https|tls)://[^\s\\]+')
 
     if [[ -n "$quic_upstreams" ]]; then
       ok "Upstream primari DoQ (QUIC):"
       while IFS= read -r u; do info "  $u"; done <<< "$quic_upstreams"
-    else
-      warn "Nessun upstream QUIC primario trovato in $svc_file"
     fi
-
     if [[ -n "$doh_upstreams" ]]; then
       ok "Upstream primari DoH:"
       while IFS= read -r u; do info "  $u"; done <<< "$doh_upstreams"
-    else
-      info "Nessun upstream DoH primario configurato"
     fi
-
+    if [[ -z "$quic_upstreams" && -z "$doh_upstreams" ]]; then
+      warn "Nessun upstream DoH/DoQ trovato in $svc_file"
+    fi
     if [[ -n "$fallback_upstreams" ]]; then
       ok "Fallback configurati:"
       while IFS= read -r u; do info "  $u"; done <<< "$fallback_upstreams"
@@ -131,7 +153,7 @@ check_upstream_quad9() {
     upstream_mode=$(grep -oP '(?<=--upstream-mode=)\S+' "$svc_file" 2>/dev/null)
     [[ -n "$upstream_mode" ]] && info "Modalità upstream: ${upstream_mode}" 
   else
-    fail "File $svc_file non trovato"
+    fail "Né $cfg_file né $svc_file trovati"
   fi
 
   # Socket UDP attivi

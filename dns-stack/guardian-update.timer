@@ -1,9 +1,9 @@
 [Unit]
-Description=Esecuzione periodica manutenzione e aggiornamento Guardian (Mercoledì e Domenica alle 04:30)
+Description=Esecuzione giornaliera manutenzione e aggiornamento Guardian (ogni giorno alle 04:30)
 After=network.target
 
 [Timer]
-OnCalendar=Wed,Sun *-*-* 04:30:00
+OnCalendar=*-*-* 04:30:00
 RandomizedDelaySec=15m
 Persistent=true
 
