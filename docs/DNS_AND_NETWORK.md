@@ -5,9 +5,9 @@
 La catena DNS combina la protezione di **Pi-hole v6** con le performance di **dnsproxy (AdGuard)**:
 
 1. **Pi-hole (porta 53)**:
-   - Riceve le richieste DNS da tutti i dispositivi della rete domestica.
+   - Riceve le richieste DNS da tutti i dispositivi della rete domestica e dai nodi Tailscale (`listeningMode = "ALL"`).
    - Filtra telemetria, pubblicità, tracker e domini malevoli.
-   - Ha come unico upstream `127.0.0.1#5353`.
+   - Ha come unico upstream `127.0.0.1#5353` e usa **Conditional Forwarding** (`revServers = [ "true,192.168.0.0/24,192.168.0.1" ]`) per risolvere i nomi host LAN tramite il router.
 
 2. **dnsproxy (porta 5353 — configurazione YAML `/etc/dnsproxy/config.yaml`)**:
    - Risolve le query non bloccate inoltrandole in parallelo verso resolver DoH/DoH3 sicuri (con filtraggio malware, `http3: true`, `tls-min-version: 1.3`, `timeout: 3s` e fallback `tls://` su `853`):
@@ -96,6 +96,7 @@ RemainAfterExit=yes
 La configurazione del firewall applica il principio del minimo privilegio e l'ottimizzazione del routing FTTH:
 - Accesso SSH limitato alla sottorete LAN locale e all'interfaccia sicura `tailscale0`.
 - Traffico DNS (porta 53 UDP/TCP) autorizzato dalla LAN locale e dai nodi Tailscale.
+- Porta WireGuard Tailscale (`41641/udp`) consentita in ingresso anche sull'interfaccia fisica `enp1s0` per accettare connessioni dirette inoltrate dal router.
 - Interfaccia web Pi-hole (porta 80/443 e 8080) accessibile solo da indirizzi sicuri.
 - Politica predefinita di blocco per tutto il traffico in ingresso non esplicitamente consentito.
 - **Accettazione Multicast IGMP** (`/etc/ufw/before.rules`): regola `ACCEPT` per traffico IGMP (`224.0.0.0/4`), azzerando il logging superfluo dei membership query del router.

@@ -74,6 +74,7 @@ ufw allow out 853/udp comment "Allow Quad9 DoQ Outgoing"
 
 # Tailscale WireGuard handshake
 ufw allow in on "$TS" to any port 41641 proto udp comment "Tailscale WireGuard handshake"
+ufw allow in on "$ETH" to any port 41641 proto udp comment "Tailscale WireGuard handshake da $ETH"
 
 # SSH
 for subnet in 192.168.0.0/16 10.0.0.0/8 172.16.0.0/12; do
