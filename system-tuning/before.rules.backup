@@ -79,3 +79,12 @@
 
 # don't delete the 'COMMIT' line or these rules won't be processed
 COMMIT
+
+# NAT: Intercetta tutto il traffico DNS (UDP/TCP 53) proveniente da Tailscale
+# (es. query verso 192.168.0.1 o DNS esterni su Exit Node) e reindirizzalo a Pi-hole locale
+*nat
+:PREROUTING ACCEPT [0:0]
+-F PREROUTING
+-A PREROUTING -i tailscale0 -p udp --dport 53 -j REDIRECT --to-ports 53
+-A PREROUTING -i tailscale0 -p tcp --dport 53 -j REDIRECT --to-ports 53
+COMMIT
