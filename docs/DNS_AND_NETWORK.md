@@ -101,3 +101,12 @@ La configurazione del firewall applica il principio del minimo privilegio e l'ot
 - Politica predefinita di blocco per tutto il traffico in ingresso non esplicitamente consentito.
 - **Accettazione Multicast IGMP** (`/etc/ufw/before.rules`): regola `ACCEPT` per traffico IGMP (`224.0.0.0/4`), azzerando il logging superfluo dei membership query del router.
 - **TCP MSS Clamping** (`/etc/ufw/before.rules`): regola `TCPMSS --clamp-mss-to-pmtu` sulla catena `ufw-before-forward` per il traffico subnet/exit-node Tailscale verso linee FTTH PPPoE con MTU a 1492 byte.
+
+---
+
+## 6. Sincronizzazione Oraria Autenticata (`chrony` + NTS — RFC 8915)
+
+`systemd-timesyncd` è stato sostituito con **`chrony`** in modalità **100% NTS-only** (`system-tuning/99-nts.conf`, pool NTP in chiaro disabilitato in `/etc/chrony/chrony.conf`):
+- Fonti autenticate via **TLS 1.3 / NTS-KE**: `time.cloudflare.com`, `ptbtime1.ptb.de`, `ptbtime2.ptb.de`, `nts.netnod.se`.
+- `minsources 2` (quorum minimo di 2 fonti autenticate) e `ntsdumpdir /var/lib/chrony` (persistenza dei cookie NTS tra i riavvii).
+- Protegge l'integrità dell'orologio di sistema da cui dipendono **DNSSEC**, **TLS 1.3** e **WireGuard (Tailscale)**.

@@ -1,6 +1,6 @@
 [Unit]
 Description=AdGuard DNS Proxy (DoH3 / DoH2 / DoT)
-After=network-online.target systemd-timesyncd.service
+After=network-online.target
 Wants=network-online.target
 Before=pihole-FTL.service
 
