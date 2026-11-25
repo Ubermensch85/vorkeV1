@@ -33,14 +33,14 @@ ratelimit: 1000
 # Explicit bootstrap resolvers (independent of local 127.0.0.1)
 bootstrap:
   - 9.9.9.9
-  - 149.112.112.9
+  - 149.112.112.112
   - 1.1.1.2
   - 1.0.0.2
 
 # Upstream Resolvers (Dual-provider Malware-blocking: Quad9 + Cloudflare Security DoH/DoH3)
 upstream:
   - https://9.9.9.9/dns-query
-  - https://149.112.112.9/dns-query
+  - https://149.112.112.112/dns-query
   - https://1.1.1.2/dns-query
   - https://1.0.0.2/dns-query
 

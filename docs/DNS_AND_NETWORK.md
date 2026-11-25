@@ -11,9 +11,9 @@ La catena DNS combina la protezione di **Pi-hole v6** con le performance di **dn
 
 2. **dnsproxy (porta 5353 — configurazione YAML `/etc/dnsproxy/config.yaml`)**:
    - Risolve le query non bloccate inoltrandole in parallelo verso resolver DoH/DoH3 sicuri (con filtraggio malware, `http3: true`, `tls-min-version: 1.3`, `timeout: 3s` e fallback `tls://` su `853`):
-     - `https://9.9.9.9/dns-query` e `https://149.112.112.9/dns-query` (Quad9 Malware-blocking)
+     - `https://9.9.9.9/dns-query` e `https://149.112.112.112/dns-query` (Quad9 Malware-blocking)
      - `https://1.1.1.2/dns-query` e `https://1.0.0.2/dns-query` (Cloudflare Malware-blocking, con negoziazione HTTP/3 + HTTP/2)
-     - Bootstrap esplicito (`9.9.9.9`, `149.112.112.9`, `1.1.1.2`, `1.0.0.2`) e fallback DoT (`tls://1.1.1.2:853`, `tls://9.9.9.9:853`).
+     - Bootstrap esplicito (`9.9.9.9`, `149.112.112.112`, `1.1.1.2`, `1.0.0.2`) e fallback DoT (`tls://1.1.1.2:853`, `tls://9.9.9.9:853`).
    - Valida la catena crittografica DNSSEC.
    - Implementa cache ottimistica da **16 MB** (`optimistic-answer-ttl: 60s`, `optimistic-max-age: 24h`) per servire risposte sub-millisecondo.
 
